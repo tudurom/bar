@@ -113,7 +113,8 @@ static bool dock = false;
 static bool topbar = true;
 static int bw = -1, bh = -1, bx = 0, by = 0;
 static int bu = 1; // Underline height
-static rgba_t fgc, bgc, ugc;
+static int bsize = 0;
+static rgba_t fgc, bbgc, bgc, ugc;
 static rgba_t dfgc, dbgc;
 static area_stack_t area_stack;
 
@@ -404,9 +405,10 @@ area_t *
 area_get (xcb_window_t win, const int btn, const int x)
 {
     // Looping backwards ensures that we get the innermost area first
-    for (int i = area_stack.at - 1; i >= 0; i--) {
+    for (int i = area_stack.at; i >= 0; i--) {
         area_t *a = &area_stack.area[i];
-        if (a->window == win && a->button == btn && x >= a->begin && x < a->end)
+        if (a->window == win && a->button == btn
+                && x >= a->begin && x < a->end)
             return a;
     }
     return NULL;
@@ -697,7 +699,7 @@ parse (char *text)
                 ucs = 0xfffd;
                 p += 5;
             }
-            // Six byte utf8 sequence
+            // Siz byte utf8 sequence
             else if ((utf[0] & 0xfe) == 0xfc) {
                 ucs = 0xfffd;
                 p += 6;
@@ -871,7 +873,6 @@ monitor_new (int x, int y, int width, int height)
         fprintf(stderr, "Failed to allocate new monitor\n");
         exit(EXIT_FAILURE);
     }
-
     ret->x = x;
     ret->y = (topbar ? by : height - bh - by) + y;
     ret->width = width;
@@ -879,11 +880,11 @@ monitor_new (int x, int y, int width, int height)
     ret->window = xcb_generate_id(c);
     int depth = (visual == scr->root_visual) ? XCB_COPY_FROM_PARENT : 32;
     xcb_create_window(c, depth, ret->window, scr->root,
-                      ret->x, ret->y, width, bh, 0,
+                      ret->x, ret->y, width, bh, bsize,
                       XCB_WINDOW_CLASS_INPUT_OUTPUT, visual,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
     (const uint32_t []) {
-        bgc.v, bgc.v, dock, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS, colormap
+        bgc.v, bbgc.v, dock, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS, colormap
     });
 
     ret->pixmap = xcb_generate_id(c);
@@ -1392,11 +1393,11 @@ main (int argc, char **argv)
     // Connect to the Xserver and initialize scr
     xconn();
 
-    while ((ch = getopt(argc, argv, "hg:bdf:a:pu:B:F:n:o:")) != -1) {
+    while ((ch = getopt(argc, argv, "hg:bdf:a:pu:B:F:R:n:o:r:")) != -1) {
         switch (ch) {
             case 'h':
-                printf ("lemonbar version %s patched with XFT support\n", VERSION);
-                printf ("usage: %s [-h | -g | -b | -d | -f | -a | -p | -n | -u | -B | -F]\n"
+                printf ("lemonbar version %s\n", VERSION);
+                printf ("usage: %s [-h | -g | -b | -d | -f | -a | -p | -n | -u | -B | -F | -R | -r]\n"
                         "\t-h Show this help\n"
                         "\t-g Set the bar geometry {width}x{height}+{xoffset}+{yoffset}\n"
                         "\t-b Put the bar at the bottom of the screen\n"
@@ -1408,6 +1409,8 @@ main (int argc, char **argv)
                         "\t-u Set the underline/overline height in pixels\n"
                         "\t-B Set background color in #AARRGGBB\n"
                         "\t-F Set foreground color in #AARRGGBB\n"
+                        "\t-R Set border color in #AARRGGBB\n"
+                        "\t-r Set border size in px\n"
                         "\t-o Add a vertical offset to the text, it can be negative\n", argv[0]);
                 exit (EXIT_SUCCESS);
             case 'g': (void)parse_geometry_string(optarg, geom_v); break;
@@ -1420,6 +1423,8 @@ main (int argc, char **argv)
             case 'o': add_y_offset(strtol(optarg, NULL, 10)); break;
             case 'B': dbgc = bgc = parse_color(optarg, NULL, (rgba_t)0x00000000U); break;
             case 'F': dfgc = fgc = parse_color(optarg, NULL, (rgba_t)0xffffffffU); break;
+            case 'R': bbgc = parse_color(optarg, NULL, (rgba_t)0x00000000U); break;
+            case 'r': bsize = strtoul(optarg, NULL, 10); break;            
             case 'a': areas = strtoul(optarg, NULL, 10); break;
         }
     }

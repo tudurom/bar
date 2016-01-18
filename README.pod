@@ -35,7 +35,7 @@ Force docking without asking the window manager. This is needed if the window ma
 =item B<-f> I<font>
 
 Define the font to load into one of the five slots (the number of slots is hardcoded and can be tweaked by
-changing the MAX_FONT_COUNT parameter in the source code). This version supports fontconfig font specifiers and anti-aliased fonts.
+changing the MAX_FONT_COUNT parameter in the source code).
 
 =item B<-a> I<number>
 
@@ -60,6 +60,14 @@ Set the background color of the bar. I<color> must be specified in the hex forma
 =item B<-F> I<color>
 
 Set the foreground color of the bar. Accepts the same color formats as B<-B>.
+
+=item B<-R> I<color>
+
+Set the border color of the bar. Accepts the same color formats as B<-B>.
+
+=item B<-r> I<px>
+
+Add a border with the specified size. I<offset> must be a number in pixels. 
 
 =item B<-o> I<offset>
 
@@ -107,7 +115,7 @@ Set the text underline color. The parameter I<color> can be I<-> or a color in o
 
 =item B<A>I<button>:I<command>:
 
-Create a clickable area starting from the current position, when the area is clicked I<command> is printed on stdout. The area is closed when a B<A> token, not followed by : is encountered.
+Create a clickable area starting from the current position, when the area is clicked I<command> is executed. The area is closed when a B<A> token, not followed by : is encountered.
 
 Eg. I<%{A:reboot:} Click here to reboot %{A}>
 
