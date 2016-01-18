@@ -65,9 +65,9 @@ Set the foreground color of the bar. Accepts the same color formats as B<-B>.
 
 Set the border color of the bar. Accepts the same color formats as B<-B>.
 
-=item B<-r> I<px>
+=item B<-r> I<size>
 
-Add a border with the specified size. I<offset> must be a number in pixels. 
+Add a border with the specified size. I<size> must be a number in pixels. 
 
 =item B<-o> I<offset>
 
