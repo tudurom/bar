@@ -186,7 +186,9 @@ Clicking on an area makes lemonbar output the command to stdout, followed by a n
 =head1 WWW
 
 Original (LemonBoy) L<git repository|https://github.com/LemonBoy/bar>
+
 Derived (krypt-n)  L<git repository|https://github.com/krypt-n/bar>
+
 This (dark-yux) L<git repository|https://github.com/dark-yux/bar>
 
 =head1 AUTHOR
