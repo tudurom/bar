@@ -6,7 +6,7 @@ lemonbar - Featherweight lemon-scented bar
 
 =head1 SYNOPSIS
 
-I<lemonbar> [-h | -g I<width>B<x>I<height>B<+>I<x>B<+>I<y> | -b | -d | -f I<font> | -p | -n I<name> | -u I<pixel> | -B I<color> | -F I<color> | -o I<offset>]
+I<lemonbar> [-h | -g I<width>B<x>I<height>B<+>I<x>B<+>I<y> | -b | -d | -f I<font> | -p | -n I<name> | -u I<pixel> | -B I<color> | -F I<color> | -R I<color> | -U I<color> | -o I<offset>]
 
 =head1 DESCRIPTION
 
@@ -64,6 +64,10 @@ Set the foreground color of the bar. Accepts the same color formats as B<-B>.
 =item B<-R> I<color>
 
 Set the border color of the bar. Accepts the same color formats as B<-B>.
+
+=item B<-U> I<color>
+
+Set the underline color of the bar. Accepts the same color formats as B<-B>.
 
 =item B<-r> I<size>
 

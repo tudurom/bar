@@ -115,7 +115,7 @@ static int bw = -1, bh = -1, bx = 0, by = 0;
 static int bu = 1; // Underline height
 static int bsize = 0;
 static rgba_t fgc, bbgc, bgc, ugc;
-static rgba_t dfgc, dbgc;
+static rgba_t dfgc, dbgc, dugc;
 static area_stack_t area_stack;
 
 static XftColor sel_fg;
@@ -278,7 +278,7 @@ draw_char (monitor_t *mon, font_t *cur_font, int x, int align, uint16_t ch)
             x = mon->width - ch_width;
             break;
     }
-    
+
         /* Draw the background first */
     fill_rect(mon->pixmap, gc[GC_CLEAR], x, 0, ch_width, bh);
 
@@ -288,7 +288,7 @@ draw_char (monitor_t *mon, font_t *cur_font, int x, int align, uint16_t ch)
     } else {
         /* xcb accepts string in UCS-2 BE, so swap */
         ch = (ch >> 8) | (ch << 8);
-        
+
         // The coordinates here are those of the baseline
         xcb_poly_text_16_simple(c, mon->pixmap, gc[GC_DRAW],
                             x, y,
@@ -475,7 +475,7 @@ area_add (char *str, const char *optend, char **end, monitor_t *mon, const int x
     }
 
     if (area_stack.at + 1 > area_stack.max) {
-        fprintf(stderr, "Cannot add any more clickable areas (used %d/%d)\n", 
+        fprintf(stderr, "Cannot add any more clickable areas (used %d/%d)\n",
                 area_stack.at, area_stack.max);
         return false;
     }
@@ -618,7 +618,7 @@ parse (char *text)
 
                     case 'B': bgc = parse_color(p, &p, dbgc); update_gc(); break;
                     case 'F': fgc = parse_color(p, &p, dfgc); update_gc(); break;
-                    case 'U': ugc = parse_color(p, &p, dbgc); update_gc(); break;
+                    case 'U': ugc = parse_color(p, &p, dugc); update_gc(); break;
 
                     case 'S':
                               if (*p == '+' && cur_mon->next)
@@ -1117,19 +1117,19 @@ xcb_visualid_t
 get_visual (void)
 {
 
-    XVisualInfo xv; 
+    XVisualInfo xv;
     xv.depth = 32;
     int result = 0;
-    XVisualInfo* result_ptr = NULL; 
+    XVisualInfo* result_ptr = NULL;
     result_ptr = XGetVisualInfo(dpy, VisualDepthMask, &xv, &result);
 
     if (result > 0) {
         visual_ptr = result_ptr->visual;
         return result_ptr->visualid;
     }
-    
+
     //Fallback
-    visual_ptr = DefaultVisual(dpy, scr_nbr);	
+    visual_ptr = DefaultVisual(dpy, scr_nbr);
 	return scr->root_visual;
 }
 
@@ -1385,7 +1385,7 @@ main (int argc, char **argv)
     dbgc = bgc = (rgba_t)0x00000000U;
     dfgc = fgc = (rgba_t)0xffffffffU;
 
-    ugc = fgc;
+    dugc = ugc = fgc;
     // A safe default
     areas = 10;
     wm_name = NULL;
@@ -1393,7 +1393,7 @@ main (int argc, char **argv)
     // Connect to the Xserver and initialize scr
     xconn();
 
-    while ((ch = getopt(argc, argv, "hg:bdf:a:pu:B:F:R:n:o:r:")) != -1) {
+    while ((ch = getopt(argc, argv, "hg:bdf:a:pu:B:F:R:U:n:o:r:")) != -1) {
         switch (ch) {
             case 'h':
                 printf ("lemonbar version %s\n", VERSION);
@@ -1410,6 +1410,7 @@ main (int argc, char **argv)
                         "\t-B Set background color in #AARRGGBB\n"
                         "\t-F Set foreground color in #AARRGGBB\n"
                         "\t-R Set border color in #AARRGGBB\n"
+                        "\t-U Set underline color in #AARRGGBB\n"
                         "\t-r Set border size in px\n"
                         "\t-o Add a vertical offset to the text, it can be negative\n", argv[0]);
                 exit (EXIT_SUCCESS);
@@ -1424,7 +1425,8 @@ main (int argc, char **argv)
             case 'B': dbgc = bgc = parse_color(optarg, NULL, (rgba_t)0x00000000U); break;
             case 'F': dfgc = fgc = parse_color(optarg, NULL, (rgba_t)0xffffffffU); break;
             case 'R': bbgc = parse_color(optarg, NULL, (rgba_t)0x00000000U); break;
-            case 'r': bsize = strtoul(optarg, NULL, 10); break;            
+            case 'U': dugc = ugc = parse_color(optarg, NULL, fgc); break;
+            case 'r': bsize = strtoul(optarg, NULL, 10); break;
             case 'a': areas = strtoul(optarg, NULL, 10); break;
         }
     }
